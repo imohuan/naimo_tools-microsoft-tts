@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>微软语音合成</title>
+</head>
+
+<body class="w-full h-screen select-none overflow-hidden">
+  <div id="app" class="w-full h-full bg-white flex">
+    <!-- 左侧文本区域 -->
+    <div class="flex-1 flex flex-col border-r border-gray-200">
+      <!-- 工具栏 -->
+      <div class="px-3 py-2 border-b border-gray-200 flex items-center gap-1.5" style="height: 42px;">
+        <button id="generateBtn"
+          class="px-3 py-1.5 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors flex items-center gap-1.5">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <path
+              d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v9.114A4.369 4.369 0 005 14c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V7.82l8-1.6v5.894A4.37 4.37 0 0015 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V3z" />
+          </svg>
+          <span>生成语音</span>
+        </button>
+        <button id="playBtn"
+          class="px-3 py-1.5 text-sm bg-green-500 text-white rounded hover:bg-green-600 transition-colors flex items-center gap-1.5"
+          disabled>
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <path
+              d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
+          </svg>
+          <span>播放</span>
+        </button>
+        <button id="pauseBtn"
+          class="px-3 py-1.5 text-sm bg-yellow-500 text-white rounded hover:bg-yellow-600 transition-colors flex items-center gap-1.5 hidden">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v12a2 2 0 01-2 2H7a2 2 0 01-2-2V4z" />
+          </svg>
+          <span>暂停</span>
+        </button>
+        <button id="downloadBtn"
+          class="px-3 py-1.5 text-sm bg-purple-500 text-white rounded hover:bg-purple-600 transition-colors flex items-center gap-1.5"
+          disabled>
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd"
+              d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+              clip-rule="evenodd" />
+          </svg>
+          <span>下载</span>
+        </button>
+        <div id="statusMsg" class="ml-auto text-xs text-gray-500"></div>
+      </div>
+
+      <!-- 文本输入区 -->
+      <div class="flex-1 p-3">
+        <textarea id="textInput"
+          class="w-full h-full p-2.5 text-sm border border-gray-300 rounded resize-none focus:outline-none focus:ring-1 focus:ring-blue-500"
+          placeholder="在此输入要转换为语音的文本..."></textarea>
+      </div>
+
+      <!-- 文本显示区（朗读时高亮） -->
+      <div id="textDisplay" class="flex-1 p-3 overflow-auto hidden">
+        <div id="textSegments" class="space-y-1.5"></div>
+      </div>
+    </div>
+
+    <!-- 右侧配置区域 -->
+    <div class="w-72 flex flex-col bg-gray-50">
+      <div class="px-3 py-2 border-b border-gray-200 flex items-center gap-1.5" style="height: 42px;">
+        <svg class="w-4 h-4 text-gray-700" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd"
+            d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z"
+            clip-rule="evenodd" />
+        </svg>
+        <h2 class="text-sm font-semibold text-gray-700">配置选项</h2>
+      </div>
+
+      <div class="flex-1 p-3 overflow-auto space-y-3">
+        <!-- 语言选择 -->
+        <div>
+          <label class="block text-xs font-medium text-gray-700 mb-1.5">语言</label>
+          <select id="langSelect"
+            class="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500">
+            <option value="zh-CN">中文（简体）</option>
+            <option value="zh-TW">中文（繁体）</option>
+            <option value="en-US">英语（美国）</option>
+            <option value="en-GB">英语（英国）</option>
+            <option value="ja-JP">日语</option>
+            <option value="ko-KR">韩语</option>
+            <option value="fr-FR">法语</option>
+            <option value="de-DE">德语</option>
+            <option value="es-ES">西班牙语</option>
+          </select>
+        </div>
+
+        <!-- 声音选择 -->
+        <div>
+          <label class="block text-xs font-medium text-gray-700 mb-1.5">声音</label>
+          <select id="voiceSelect"
+            class="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500">
+            <option value="zh-CN-XiaoxiaoNeural">晓晓（女声）</option>
+            <option value="zh-CN-YunxiNeural">云希（男声）</option>
+            <option value="zh-CN-YunyangNeural">云扬（男声）</option>
+            <option value="zh-CN-XiaoyiNeural">晓伊（女声）</option>
+          </select>
+        </div>
+
+        <!-- 音频格式 -->
+        <div>
+          <label class="block text-xs font-medium text-gray-700 mb-1.5">音频格式</label>
+          <select id="formatSelect"
+            class="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500">
+            <option value="audio-24khz-96kbitrate-mono-mp3">MP3 (24kHz 96kbps)</option>
+            <option value="audio-24khz-48kbitrate-mono-mp3">MP3 (24kHz 48kbps)</option>
+            <option value="audio-16khz-32kbitrate-mono-mp3">MP3 (16kHz 32kbps)</option>
+          </select>
+        </div>
+
+        <!-- 语速 -->
+        <div>
+          <label class="block text-xs font-medium text-gray-700 mb-1">
+            语速：<span id="rateValue" class="font-normal">0%</span>
+          </label>
+          <input type="range" id="rateSlider" min="-50" max="100" value="0" step="10" class="w-full">
+          <div class="flex justify-between text-xs text-gray-400 mt-0.5">
+            <span>慢</span>
+            <span>正常</span>
+            <span>快</span>
+          </div>
+        </div>
+
+        <!-- 音调 -->
+        <div>
+          <label class="block text-xs font-medium text-gray-700 mb-1">
+            音调：<span id="pitchValue" class="font-normal">0%</span>
+          </label>
+          <input type="range" id="pitchSlider" min="-50" max="50" value="0" step="10" class="w-full">
+          <div class="flex justify-between text-xs text-gray-400 mt-0.5">
+            <span>低</span>
+            <span>正常</span>
+            <span>高</span>
+          </div>
+        </div>
+
+        <!-- 音量 -->
+        <div>
+          <label class="block text-xs font-medium text-gray-700 mb-1">
+            音量：<span id="volumeValue" class="font-normal">0%</span>
+          </label>
+          <input type="range" id="volumeSlider" min="-50" max="50" value="0" step="10" class="w-full">
+          <div class="flex justify-between text-xs text-gray-400 mt-0.5">
+            <span>小</span>
+            <span>正常</span>
+            <span>大</span>
+          </div>
+        </div>
+
+        <!-- 超时时间 -->
+        <div>
+          <label class="block text-xs font-medium text-gray-700 mb-1.5">超时时间（秒）</label>
+          <input type="number" id="timeoutInput" value="10" min="5" max="60"
+            class="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500">
+        </div>
+      </div>
+    </div>
+
+    <!-- 音频播放器（隐藏） -->
+    <audio id="audioPlayer" class="hidden"></audio>
+  </div>
+
+  <!-- TypeScript 入口文件 -->
+  <script type="module" src="/src/main.ts"></script>
+</body>
+
+</html>
