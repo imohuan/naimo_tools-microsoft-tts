@@ -61,7 +61,7 @@ export default defineConfig({
       '@': resolve(__dirname, './src')
     },
     // 强制使用 Node.js 环境的条件导出，而不是浏览器环境
-    conditions: ['node'],
+    conditions: ['node', 'require'],
     // 优先使用 main 字段而不是 browser 字段
     mainFields: ['main', 'module']
   },

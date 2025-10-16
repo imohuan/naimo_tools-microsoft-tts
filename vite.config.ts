@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
+import vue from '@vitejs/plugin-vue';
 import { preloadBuilderPlugin, manifestCopyPlugin, devWatchPlugin, copyFolderPlugin } from './vite-plugins';
 import tailwindcss from '@tailwindcss/vite'
 
@@ -10,6 +11,7 @@ export default defineConfig({
 
   // 插件配置
   plugins: [
+    vue(),                        // Vue 插件支持
     tailwindcss(),
     preloadBuilderPlugin(),      // 插件1: 打包 preload.ts
     manifestCopyPlugin(),         // 插件2: 复制 manifest.json

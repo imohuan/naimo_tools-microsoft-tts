@@ -64,14 +64,94 @@ button:disabled {
   cursor: not-allowed;
 }
 
+/* 按钮激活状态（朗读模式） */
+button.active {
+  ring: 2px;
+  ring-color: currentColor;
+  ring-offset: 2px;
+}
+
+/* 朗读按钮激活样式 */
+#readBtn.reading-mode {
+  background: #059669;
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.2);
+}
+
 /* 文本段落动画 */
 .segment {
   transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
 }
 
 .segment:hover {
   transform: translateX(2px);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* 朗读模式下的段落样式 */
+.segment.active {
+  background: linear-gradient(90deg, #fef08a 0%, #fef08a 100%);
+  border-color: #fbbf24;
+  font-weight: 500;
+}
+
+.segment.playing {
+  background: linear-gradient(90deg, #bfdbfe 0%, #bfdbfe 100%);
+  border-color: #3b82f6;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.segment.loaded::after {
+  content: "✓";
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  color: #10b981;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.segment.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.segment.loading::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(59, 130, 246, 0.1),
+    transparent
+  );
+  animation: shimmer 1.5s infinite;
+}
+
+/* 脉冲动画 */
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+/* 闪烁加载动画 */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
 }
 
 /* 输入框样式 */

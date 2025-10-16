@@ -53,8 +53,14 @@ async function generateSpeech(
 
     onProgress?.({ type: 'progress', message: '正在生成语音...' });
 
-    // 生成临时文件路径
-    const tempDir = os.tmpdir();
+    // 生成音频文件路径到 temp/naimo/ 文件夹
+    const tempDir = path.join(os.tmpdir(), 'naimo');
+
+    // 确保 temp/naimo/ 目录存在
+    if (!fs.existsSync(tempDir)) {
+      fs.mkdirSync(tempDir, { recursive: true });
+    }
+
     const timestamp = Date.now();
     const filename = `tts_${timestamp}.mp3`;
     const outputPath = path.join(tempDir, filename);

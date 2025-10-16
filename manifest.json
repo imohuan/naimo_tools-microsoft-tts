@@ -4,7 +4,7 @@
   "name": "微软语音合成",
   "version": "1.0.0",
   "author": "Naimo Tools",
-  "icon": "🔊",
+  "icon": "./ico.png",
   "description": "使用微软 Edge TTS 将文本转换为语音",
   "category": "tool",
   "enabled": true,
@@ -14,7 +14,7 @@
     {
       "path": "tts",
       "name": "文本转语音",
-      "icon": "🔊",
+      "icon": "./ico.png",
       "description": "将文本转换为语音，支持多种语言和声音",
       "type": "text"
     }
