@@ -198,3 +198,4 @@ const config = reactive<TTSConfig>({ ... });
 **重構完成時間**: 2025-10-16
 **重構者**: AI Assistant
 
+

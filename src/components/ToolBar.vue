@@ -38,10 +38,37 @@
     <button
       v-show="!isReadingMode"
       @click="$emit('preview')"
-      :disabled="!hasText"
+      :disabled="!hasText || isPreviewLoading || isGenerating"
       class="px-3 py-1.5 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
     >
-      <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+      <!-- 加载动画 -->
+      <svg
+        v-show="isPreviewLoading"
+        class="w-4 h-4 animate-spin"
+        fill="none"
+        viewBox="0 0 24 24"
+      >
+        <circle
+          class="opacity-25"
+          cx="12"
+          cy="12"
+          r="10"
+          stroke="currentColor"
+          stroke-width="4"
+        ></circle>
+        <path
+          class="opacity-75"
+          fill="currentColor"
+          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+        ></path>
+      </svg>
+      <!-- 正常图标 -->
+      <svg
+        v-show="!isPreviewLoading"
+        class="w-4 h-4"
+        fill="currentColor"
+        viewBox="0 0 20 20"
+      >
         <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
         <path
           fill-rule="evenodd"
@@ -49,27 +76,54 @@
           clip-rule="evenodd"
         />
       </svg>
-      <span>试听</span>
+      <span>{{ isPreviewLoading ? "加载中..." : "试听" }}</span>
     </button>
 
     <!-- 生成音频按钮 -->
     <button
       v-show="!isReadingMode"
       @click="$emit('generate')"
-      :disabled="!hasText"
+      :disabled="!hasText || isGenerating || isPreviewLoading"
       class="px-3 py-1.5 text-sm bg-orange-500 text-white rounded hover:bg-orange-600 transition-colors flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
     >
-      <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+      <!-- 加载动画 -->
+      <svg
+        v-show="isGenerating"
+        class="w-4 h-4 animate-spin"
+        fill="none"
+        viewBox="0 0 24 24"
+      >
+        <circle
+          class="opacity-25"
+          cx="12"
+          cy="12"
+          r="10"
+          stroke="currentColor"
+          stroke-width="4"
+        ></circle>
+        <path
+          class="opacity-75"
+          fill="currentColor"
+          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+        ></path>
+      </svg>
+      <!-- 正常图标 -->
+      <svg
+        v-show="!isGenerating"
+        class="w-4 h-4"
+        fill="currentColor"
+        viewBox="0 0 20 20"
+      >
         <path
           d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v9.114A4.369 4.369 0 005 14c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V7.82l8-1.6v5.894A4.37 4.37 0 0015 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V3z"
         />
       </svg>
-      <span>生成音频</span>
+      <span>{{ isGenerating ? "生成中..." : "生成音频" }}</span>
     </button>
 
     <!-- 下载按钮 -->
     <button
-      v-show="!isReadingMode"
+      v-show="!isReadingMode && showAudioPlayer"
       @click="$emit('download')"
       :disabled="!hasAudio"
       class="px-3 py-1.5 text-sm bg-purple-500 text-white rounded hover:bg-purple-600 transition-colors flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -174,12 +228,15 @@ import type { PlayState } from "../typings";
 interface Props {
   hasText: boolean;
   hasAudio: boolean;
+  showAudioPlayer: boolean;
   isReadingMode: boolean;
   playState: PlayState;
   playControlDisabled: boolean;
   showPreloadStatus: boolean;
   preloadStatusText: string;
   loadingSegments: Set<number>;
+  isPreviewLoading: boolean;
+  isGenerating: boolean;
 }
 
 const props = defineProps<Props>();

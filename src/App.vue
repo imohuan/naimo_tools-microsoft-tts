@@ -6,12 +6,15 @@
       <ToolBar
         :has-text="!!textInput.trim()"
         :has-audio="!!currentAudioPath"
+        :show-audio-player="showAudioPlayer"
         :is-reading-mode="isReadingMode"
         :play-state="playState"
         :play-control-disabled="playControlBtnDisabled"
         :show-preload-status="showPreloadStatus"
         :preload-status-text="preloadStatusText"
         :loading-segments="loadingSegments"
+        :is-preview-loading="isPreviewLoading"
+        :is-generating="isGenerating"
         @preview="previewSpeech"
         @read="readFullText"
         @generate="generateSpeech"
@@ -69,6 +72,8 @@ const playControlBtnDisabled = ref(false);
 const showPreloadStatus = ref(false);
 const preloadStatusText = ref("");
 const loadingSegments = ref<Set<number>>(new Set()); // 正在加載的段落索引
+const isPreviewLoading = ref(false); // 試聽加載狀態
+const isGenerating = ref(false); // 生成音頻加載狀態
 
 // 引用
 const configPanelRef = ref<InstanceType<typeof ConfigPanel> | null>(null);
@@ -165,6 +170,7 @@ async function previewSpeech() {
   }
 
   try {
+    isPreviewLoading.value = true;
     const previewText = text.substring(0, 10);
     const apiConfig = convertToApiConfig(config);
     const audioPath = await window.ttsPluginAPI.generateSpeech(
@@ -189,6 +195,8 @@ async function previewSpeech() {
     console.error("试听失败:", error);
     showNotification(`试听失败: ${error.message}`, "error");
     naimo.log.error("试听失败", error);
+  } finally {
+    isPreviewLoading.value = false;
   }
 }
 
@@ -269,6 +277,7 @@ async function generateSpeech() {
   }
 
   try {
+    isGenerating.value = true;
     const apiConfig = convertToApiConfig(config);
     const audioPath = await window.ttsPluginAPI.generateSpeech(text, apiConfig);
     currentAudioPath.value = audioPath;
@@ -287,6 +296,8 @@ async function generateSpeech() {
     console.error("生成音频失败:", error);
     showNotification(`生成失败: ${error.message}`, "error");
     naimo.log.error("生成音频失败", error);
+  } finally {
+    isGenerating.value = false;
   }
 }
 
